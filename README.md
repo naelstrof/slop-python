@@ -2,6 +2,8 @@
 
 Just a quick python extension for region selecting. Read https://github.com/naelstrof/slop for info on what kind of region selecting.
 
+## Usage
+
 ```python
 import slop
 rect = slop.select(border=30,r=1,g=0,b=0,a=0.5)
@@ -30,3 +32,8 @@ Available arguments:
 | a             | Float    | The alpha component of the rectangle color.                                                     |
 | xdisplay      | String   | The desired X display string.                                                                   |
 | quiet         | Bool     | If set to true, keeps slop from printing info to std::cout.                                     |
+
+## Installation
+
+Windows: `python setup.py install`
+Linux: `sudo python setup.py install`
