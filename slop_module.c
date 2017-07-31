@@ -18,7 +18,7 @@ PyObject* slop_python_select( PyObject* self, PyObject* args, PyObject* keywords
                                 "quiet",
                                 NULL};
     PyObject* shaderlist = NULL;
-    if (!PyArg_ParseTupleAndKeywords(args, keywords, "|$fffiiiiO!ffffsi", skeywords,
+    if (!PyArg_ParseTupleAndKeywords(args, keywords, "|$fffiiiiOffffsi", skeywords,
          &(options.border),
          &(options.padding),
          &(options.tolerance),
@@ -26,7 +26,6 @@ PyObject* slop_python_select( PyObject* self, PyObject* args, PyObject* keywords
          &(options.noopengl),
          &(options.nokeyboard),
          &(options.nodecorations),
-         &PyList_Type,
          &(shaderlist),
          &(options.r),
          &(options.g),
@@ -40,22 +39,32 @@ PyObject* slop_python_select( PyObject* self, PyObject* args, PyObject* keywords
     // Concat all of the strings in the shader list.
     char* line = malloc(1);
     if ( shaderlist ) {
-        int numLines;
+        Py_ssize_t numLines;
         line[0] = '\0';
-        char* element;
+        const char* element = NULL;
         PyObject* strObj;  
         numLines = PyList_Size(shaderlist);
-        if ( numLines < 0 ) {
-            PyErr_SetString(SlopError, "`shaders` must have a type of list if given.");
+        if ( numLines <= 0 ) {
+            PyErr_SetString(SlopError, "`shaders` must have a type of list, and contain strings if given.");
             return NULL;
         }
-        for (int i=0; i<numLines; i++){
+        for (Py_ssize_t i=0; i<numLines; i++) {
             strObj = PyList_GetItem(shaderlist, i);
-            element = PyBytes_AsString( strObj );
-
+            if (!PyUnicode_Check( strObj )) {
+                PyErr_SetString(SlopError, "Contents of list `shaders` must have a type of string if given.");
+                return NULL;
+            }
+            PyObject* pyString = PyUnicode_AsEncodedString(strObj, "utf-8", "Error ~");
+            element = PyBytes_AS_STRING(pyString);
+            if ( line[0] == '\0' ) {
+                line = malloc(strlen(element)+1);
+                memcpy( line, element, strlen(element) );
+                line[strlen(element)+1] = '\0';
+                continue;
+            }
             char* comma = ",";
             char* new_str;
-            new_str = malloc(strlen(line)+strlen(element)+2);
+            new_str = malloc(strlen(line)+strlen(element)+strlen(comma)+2);
             new_str[0] = '\0';
             strcat(new_str,line);
             strcat(new_str,comma);
