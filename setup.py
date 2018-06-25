@@ -1,4 +1,4 @@
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 extension_mod = Extension("slop", sources = ["slop_module.c"], libraries = ['slopy'])
 
